@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Predictor | Tech Industry</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-grad-1: #1e1b4b;
+            --bg-grad-2: #312e81;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #a5b4fc;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #e0e7ff;
+            font-weight: 500;
+        }
+
+        select, input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        select option {
+            background: #312e81;
+            color: white;
+        }
+
+        select:focus, input:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            grid-column: 1 / -1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
+        }
+
+        .result-card {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            color: #a5b4fc;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .result-value.yes {
+            color: #34d399; /* emerald-400 */
+        }
+        
+        .result-value.no {
+            color: #f87171; /* red-400 */
+        }
+
+        .error {
+            color: #fca5a5;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mental Health Predictor</h1>
+        <p class="subtitle">Predict if an employee seeks treatment</p>
+        
+        <form method="POST" action="{% url 'predict' %}" class="form-grid">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="Age">Age</label>
+                <input type="number" id="Age" name="Age" required value="{{ inputs.Age|default:'30' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="Gender">Gender</label>
+                <select id="Gender" name="Gender" required>
+                    <option value="male" {% if inputs.Gender == 'male' %}selected{% endif %}>Male</option>
+                    <option value="female" {% if inputs.Gender == 'female' %}selected{% endif %}>Female</option>
+                    <option value="other" {% if inputs.Gender == 'other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="family_history">Family History</label>
+                <select id="family_history" name="family_history" required>
+                    <option value="No" {% if inputs.family_history == 'No' %}selected{% endif %}>No</option>
+                    <option value="Yes" {% if inputs.family_history == 'Yes' %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="work_interfere">Work Interfere</label>
+                <select id="work_interfere" name="work_interfere" required>
+                    <option value="Don't know" {% if inputs.work_interfere == "Don't know" %}selected{% endif %}>Don't know</option>
+                    <option value="Never" {% if inputs.work_interfere == 'Never' %}selected{% endif %}>Never</option>
+                    <option value="Rarely" {% if inputs.work_interfere == 'Rarely' %}selected{% endif %}>Rarely</option>
+                    <option value="Sometimes" {% if inputs.work_interfere == 'Sometimes' %}selected{% endif %}>Sometimes</option>
+                    <option value="Often" {% if inputs.work_interfere == 'Often' %}selected{% endif %}>Often</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="remote_work">Remote Work</label>
+                <select id="remote_work" name="remote_work" required>
+                    <option value="No" {% if inputs.remote_work == 'No' %}selected{% endif %}>No</option>
+                    <option value="Yes" {% if inputs.remote_work == 'Yes' %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tech_company">Tech Company</label>
+                <select id="tech_company" name="tech_company" required>
+                    <option value="Yes" {% if inputs.tech_company == 'Yes' %}selected{% endif %}>Yes</option>
+                    <option value="No" {% if inputs.tech_company == 'No' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="benefits">Mental Health Benefits</label>
+                <select id="benefits" name="benefits" required>
+                    <option value="Don't know" {% if inputs.benefits == "Don't know" %}selected{% endif %}>Don't know</option>
+                    <option value="Yes" {% if inputs.benefits == 'Yes' %}selected{% endif %}>Yes</option>
+                    <option value="No" {% if inputs.benefits == 'No' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="care_options">Care Options</label>
+                <select id="care_options" name="care_options" required>
+                    <option value="Not sure" {% if inputs.care_options == 'Not sure' %}selected{% endif %}>Not sure</option>
+                    <option value="Yes" {% if inputs.care_options == 'Yes' %}selected{% endif %}>Yes</option>
+                    <option value="No" {% if inputs.care_options == 'No' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="wellness_program">Wellness Program</label>
+                <select id="wellness_program" name="wellness_program" required>
+                    <option value="Don't know" {% if inputs.wellness_program == "Don't know" %}selected{% endif %}>Don't know</option>
+                    <option value="Yes" {% if inputs.wellness_program == 'Yes' %}selected{% endif %}>Yes</option>
+                    <option value="No" {% if inputs.wellness_program == 'No' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="leave">Leave Policy</label>
+                <select id="leave" name="leave" required>
+                    <option value="Don't know" {% if inputs.leave == "Don't know" %}selected{% endif %}>Don't know</option>
+                    <option value="Somewhat easy" {% if inputs.leave == 'Somewhat easy' %}selected{% endif %}>Somewhat easy</option>
+                    <option value="Very easy" {% if inputs.leave == 'Very easy' %}selected{% endif %}>Very easy</option>
+                    <option value="Somewhat difficult" {% if inputs.leave == 'Somewhat difficult' %}selected{% endif %}>Somewhat difficult</option>
+                    <option value="Very difficult" {% if inputs.leave == 'Very difficult' %}selected{% endif %}>Very difficult</option>
+                </select>
+            </div>
+
+            <button type="submit">Predict</button>
+
+            {% if result %}
+            <div class="result-card">
+                <div class="result-title">Prediction</div>
+                <div class="result-value {% if result == 'Yes' %}yes{% else %}no{% endif %}">
+                    {% if result == 'Yes' %}Likely to Seek Treatment{% else %}Unlikely to Seek Treatment{% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>
